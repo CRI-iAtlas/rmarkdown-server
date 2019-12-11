@@ -1,7 +1,11 @@
 ---
 title: Fiji earthquakes
 output: html_document
+params:
+   region: east
 ---
+
+# Region `r params$region`
 
 ```{r echo=FALSE}
 library(crosstalk)
