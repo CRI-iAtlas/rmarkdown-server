@@ -1,0 +1,70 @@
+```{R echo=FALSE}
+# Load package
+library(networkD3)
+```
+
+Demos from: http://christophergandrud.github.io/networkD3/
+
+## simpleNetwork
+
+For very basic force directed network graphics you can use simpleNetwork. For example:
+
+```{R}
+# Load package
+library(networkD3)
+
+# Create fake data
+src <- c("A", "A", "A", "A",
+        "B", "B", "C", "C", "D")
+target <- c("B", "C", "D", "J",
+            "E", "F", "G", "H", "I")
+networkData <- data.frame(src, target)
+
+# Plot
+simpleNetwork(networkData)
+```
+
+## forceNetwork
+
+Use forceNetwork to have more control over the appearance of the forced directed network and to plot more complicated networks. Here is an example:
+
+```{R}
+# Load data
+data(MisLinks)
+data(MisNodes)
+
+# Plot
+forceNetwork(Links = MisLinks, Nodes = MisNodes,
+            Source = "source", Target = "target",
+            Value = "value", NodeID = "name",
+            Group = "group", opacity = 0.8)
+```
+
+From version 0.1.3 you can also allow scroll-wheel zooming by setting zoom = TRUE.
+
+## sankeyNetwork
+
+You can also create Sankey diagrams with sankeyNetwork. Here is an example using downloaded JSON data:
+
+```{R}
+# Load energy projection data
+# Load energy projection data
+URL <- paste0(
+        "https://cdn.rawgit.com/christophergandrud/networkD3/",
+        "master/JSONdata/energy.json")
+Energy <- jsonlite::fromJSON(URL)
+# Plot
+sankeyNetwork(Links = Energy$links, Nodes = Energy$nodes, Source = "source",
+             Target = "target", Value = "value", NodeID = "name",
+             units = "TWh", fontSize = 12, nodeWidth = 30)
+```
+
+## dendroNetwork
+
+From version 0.2, it is also possible to create dendrograms using dendroNetwork.
+
+```{R}
+hc <- hclust(dist(USArrests), "ave")
+
+dendroNetwork(hc, height = 600)
+```

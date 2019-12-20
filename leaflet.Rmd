@@ -1,0 +1,42 @@
+---
+title: Leaflet Demo
+output: html_document
+params:
+  tiles:
+    label: "Tiles"
+    value: "normal"
+    input: "select"
+    choices:
+      - "normal"
+      - "monochrome"
+---
+
+```{R echo=FALSE}
+# Load package
+library(networkD3)
+```
+
+Demos from: http://rstudio.github.io/leaflet/
+
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+```{R}
+library(leaflet)
+
+m <- leaflet(width = "100%", height=800) %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  
+  # addMarkers(lng=29.9773, lat=31.1325, popup="The Pyramids")
+  addMarkers(lng=174.768, lat=-36.852, popup="The birthplace of R")
+
+if (params$tiles == "normal") {m} else {
+  m %>% addProviderTiles(providers$Stamen.Toner)
+}
+# m  # Print the map
+```
