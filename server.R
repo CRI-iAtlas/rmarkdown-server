@@ -1,6 +1,12 @@
 library(httpuv)
 library(rmarkdown)
 library(urltools)
+
+# FUTURE:
+# We should be able to return the params metadata structure via a custom
+# HTTP header using something like this:
+#   jsonlite::toJSON(rmarkdown::metadata$params, auto_unbox = TRUE)
+
 httd = function(...) {
   # httpuv uses Rook-style request handling:
   # https://github.com/jeffreyhorner/Rook
@@ -28,7 +34,8 @@ httd = function(...) {
         status = 200L,
         headers = list(
           'Content-Type' = 'text/html',
-          'Cache-Control' = 'max-age=3600'
+          'Cache-Control' = 'max-age=3600',
+          'x-rmarkdown-params' = '{}'
         ),
         body = body
       )
