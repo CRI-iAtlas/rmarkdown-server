@@ -12,7 +12,7 @@ Make sure you have R installed. RStudio is not strictly required, but we'll assu
 
 - RStudio: [https://rstudio.com/products/rstudio/download/](https://rstudio.com/products/rstudio/download/)
 
-Open: rmarkdown-server.RProj
+Git-clone this repository and then open rmarkdown-server.RProj.
 
 Then install the required packages by executing this in the RSudio console:
 
