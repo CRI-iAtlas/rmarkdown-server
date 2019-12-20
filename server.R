@@ -5,16 +5,27 @@ httd = function(...) {
   # httpuv uses Rook-style request handling:
   # https://github.com/jeffreyhorner/Rook
   app <- list(call = function(env){
-    .params <- as.list(param_get(env$QUERY_STRING))
-    rmarkdown::render('example.Rmd', params=.params)
-    body = readFile('example.html')
-    list(
-      status = 200L,
-      headers = list(
-        'Content-Type' = 'text/html'
-      ),
-      body = body
-    )
+    file_name <- paste(".", env$PATH_INFO, sep = "")
+    if (!file.exists(file_name)) {
+      paste(".", env$PATH_INFO, ".Rmd", sep = "")
+    }
+    if (file.exists(file_name)) {
+      .params <- as.list(param_get(env$QUERY_STRING))
+      output_file_name <- paste(file_name,'.html', sep = "")
+      rmarkdown::render(file_name, params=.params, output_file=output_file_name)
+      body = readFile(output_file_name)
+      list(
+        status = 200L,
+        headers = list(
+          'Content-Type' = 'text/html'
+        ),
+        body = body
+      )
+    } else {
+      list(
+        status = 404L
+      )
+    }
   })
   server <- createServer(app = app, ...)
   server$startServer()
@@ -50,3 +61,8 @@ createServer = function(
     }
   )
 }
+if (!is.null(.GlobalEnv$runningServer)) {
+  .GlobalEnv$runningServer$stopServer()
+}
+
+runningServer <- httd()

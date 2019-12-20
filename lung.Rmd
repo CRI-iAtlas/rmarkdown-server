@@ -1,0 +1,33 @@
+---
+title: Lung Cancer Surival
+output: html_document
+params:
+  variable:
+    label: "Variable"
+    value: "sex"
+    input: select
+    choices:
+      - "sex"
+      - "ph.karno"
+      - "pat.karno"
+---
+
+```{r echo=FALSE}
+(function(){
+  data <- survival::lung
+
+  if (params$variable == "sex") {
+    fit <- survival::survfit(survival::Surv(time, status) ~ sex, data = data)
+  } else if (params$variable == "ph.karno") {
+    fit <- survival::survfit(survival::Surv(time, status) ~ ph.karno, data = data)
+  } else {
+    fit <- survival::survfit(survival::Surv(time, status) ~ pat.karno, data = data)
+  }
+
+  # Basic survival curves
+  survminer::ggsurvplot(
+    fit,
+    data = data, title = params$variable
+  )
+})()
+```
