@@ -1,5 +1,4 @@
-library(httpuv)
-library(rmarkdown)
+# libraries: httpuv, rmarkdown
 library(urltools)
 
 # FUTURE:
@@ -30,12 +29,14 @@ httd = function(...) {
       # delete the temp file
       unlink(output_file_path)
       
+      params <- rmarkdown::yaml_front_matter(file_name)$params
+      
       list(
         status = 200L,
         headers = list(
           'Content-Type' = 'text/html',
           'Cache-Control' = 'max-age=3600',
-          'x-rmarkdown-params' = '{}'
+          'x-rmarkdown-params' = jsonlite::toJSON(params)
         ),
         body = body
       )
@@ -68,14 +69,14 @@ createServer = function(
     host = host,
     port = port,
     startServer = function() {
-      id = startServer(host, port, app)
+      id = httpuv::startServer(host, port, app)
       server <<- id
       print(paste0('server started on port ',port))
       invisible(id)
     },
     stopServer = function() {
       if (is.null(server)) stop('The server has not been started yet.')
-      stopServer(server)
+      try(httpuv::stopServer(server))
     }
   )
 }
