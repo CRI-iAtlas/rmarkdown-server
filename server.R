@@ -1,5 +1,6 @@
 # libraries: httpuv, rmarkdown
 library(urltools)
+library(stringr)
 
 # FUTURE:
 # We should be able to return the params metadata structure via a custom
@@ -10,40 +11,76 @@ httd = function(...) {
   # httpuv uses Rook-style request handling:
   # https://github.com/jeffreyhorner/Rook
   app <- list(call = function(env){
-    public_root <- "./public"
-    file_name <- paste(public_root, env$PATH_INFO, sep = "")
-    if (!file.exists(file_name)) {
-      file_name <- paste(public_root, env$PATH_INFO, ".Rmd", sep = "")
-    }
-    if (file.exists(file_name)) {
-      .params <- as.list(param_get(env$QUERY_STRING))
-      
-      # render to temp file
-      output_file_name <- paste(stringi::stri_rand_strings(1,20),'.html', sep = "")
-      rmarkdown::render(file_name, params=.params, output_file=output_file_name)
-      
-      # read temp file
-      output_file_path <- paste(public_root, output_file_name, sep="/")
-      body <- readFile(output_file_path)
-      
-      # delete the temp file
-      unlink(output_file_path)
-      
-      params <- rmarkdown::yaml_front_matter(file_name)$params
-      
+    if (env$REQUEST_METHOD == "OPTIONS") {
       list(
         status = 200L,
         headers = list(
-          'Content-Type' = 'text/html',
+          'Access-Control-Allow-Origin' =  "*",
+          'Access-Control-Allow-Methods' = "GET, POST, PUT, UPDATE, DELETE",
+          'Access-Control-Allow-Headers' = "",
           'Cache-Control' = 'max-age=3600',
-          'x-rmarkdown-params' = jsonlite::toJSON(params)
+          'Content-Type' =  "text/html; charset=utf-8"
         ),
-        body = body
+        body = ''
       )
-    } else {
-      list(
-        status = 404L
-      )
+    } else if (env$REQUEST_METHOD == "GET") {
+      public_root <- "./public"
+      base_file_name <- env$PATH_INFO
+      returnParams <- FALSE
+      if (str_detect(base_file_name, "^/params/")) {
+        base_file_name <- str_replace(base_file_name, "^/params", "")
+        returnParams <- TRUE
+      }
+
+      file_name <- paste(public_root, base_file_name, sep = "")
+
+      if (!file.exists(file_name)) {
+        file_name <- paste(public_root, base_file_name, ".Rmd", sep = "")
+      }
+
+      if (file.exists(file_name)) {
+        if (returnParams) {
+          params <- rmarkdown::yaml_front_matter(file_name)$params
+
+          list(
+            status = 200L,
+            headers = list(
+              'Content-Type' = 'application/json',
+              'Cache-Control' = 'max-age=3600',
+              'Access-Control-Allow-Origin' = '*'
+            ),
+            body = jsonlite::toJSON(params)
+          )
+
+        } else {
+          .params <- as.list(param_get(env$QUERY_STRING))
+
+          # render to temp file
+          output_file_name <- paste(stringi::stri_rand_strings(1,20),'.html', sep = "")
+          rmarkdown::render(file_name, params=.params, output_file=output_file_name)
+
+          # read temp file
+          output_file_path <- paste(public_root, output_file_name, sep="/")
+          body <- readFile(output_file_path)
+
+          # delete the temp file
+          unlink(output_file_path)
+
+          list(
+            status = 200L,
+            headers = list(
+              'Content-Type' = 'text/html',
+              'Cache-Control' = 'max-age=3600',
+              'Access-Control-Allow-Origin' = '*'
+            ),
+            body = body
+          )
+        }
+      } else {
+        list(
+          status = 404L
+        )
+      }
     }
   })
   server <- createServer(app = app, ...)
