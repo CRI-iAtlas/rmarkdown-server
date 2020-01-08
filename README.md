@@ -2,7 +2,7 @@
 
 WARNING: This is a proof of concept only. It is not ready for production.
 
-A simple HTTP server written in R that serves up parameterized RMarkdown files. They key difference compared to services like http://rpubs.com/ is the RMarkdown files are re-rendered with each unique set or parameter values passed in the query string.
+A simple HTTP server written in R that serves up parameterized RMarkdown files. The key difference compared to services like http://rpubs.com is the RMarkdown files are re-rendered with each unique set of parameter-values passed in the query string.
 
 Any Rmd file in `./public` can be served. Parameters are expressed in standard RMarkdown metadata. Read more about RMarkdown params here: https://bookdown.org/yihui/rmarkdown/.
 
@@ -34,13 +34,35 @@ stop server:
 .GlobalEnv$runningServer$stopServer()
 ```
 
-# Example
+# API
 
-With the server running, open:
+## `/` Get Rendered RMarkdown File with Params
 
-* http://localhost:5001/leaflet.Rmd?tiles=mono
-* http://localhost:5001/leaflet.Rmd?tiles=normal
+Get a rendered rmarkdown file:
+
+* http://localhost:5001/leaflet.Rmd
 
 The .Rmd extension is optional:
 
 * http://localhost:5001/leaflet
+
+Pass params in the query string:
+
+* http://localhost:5001/leaflet.Rmd?tiles=mono
+* http://localhost:5001/leaflet.Rmd?tiles=normal
+
+
+## `/params/` Get Params Metadata for RMarkdown File
+
+Precede the path with `/params/` to get a JSON object directly derived from the `params` property in the Rmarkdown file's metadata:
+
+* http://localhost:5001/params/leaflet.Rmd
+
+The .Rmd extension is optional:
+
+* http://localhost:5001/params/leaflet
+
+
+# Production TODO
+
+Currently a url could have "/../" in the path and give access outside `public/`.
