@@ -118,7 +118,7 @@ createServer = function(
   )
 }
 if (!is.null(.GlobalEnv$runningServer)) {
-  .GlobalEnv$runningServer$stopServer()
+  try(.GlobalEnv$runningServer$stopServer())
 }
 
 runningServer <- httd()
