@@ -58,6 +58,43 @@ Precede the path with `/params/` to get a JSON object directly derived from the 
 
 * http://localhost:5001/params/leaflet.Rmd
 
+leaflet.Rmd metadata:
+
+```yaml
+title: Leaflet Demo
+output: html_document
+params:
+  tiles:
+    label: "Tiles"
+    value: "normal"
+    input: "select"
+    choices:
+      - "normal"
+      - "monochrome"
+```
+
+/params/leaflet.Rmd output:
+
+```json
+{
+  "tiles": {
+    "label": [
+      "Tiles"
+    ],
+    "value": [
+      "normal"
+    ],
+    "input": [
+      "select"
+    ],
+    "choices": [
+      "normal",
+      "monochrome"
+    ]
+  }
+}
+```
+
 The .Rmd extension is optional:
 
 * http://localhost:5001/params/leaflet
