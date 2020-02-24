@@ -1,3 +1,6 @@
+# install libraries if not already installed
+renv::restore()
+
 # libraries: httpuv, rmarkdown
 library(urltools)
 library(stringr)
@@ -6,6 +9,37 @@ library(stringr)
 # We should be able to return the params metadata structure via a custom
 # HTTP header using something like this:
 #   jsonlite::toJSON(rmarkdown::metadata$params, auto_unbox = TRUE)
+
+
+readFile = function(
+  fileName
+) {
+  invisible(readChar(fileName, file.info(fileName)$size))
+}
+
+createServer = function(
+  host = '127.0.0.1',
+  port = 5001,
+  app
+) {
+  port = as.integer(port)
+
+  server = NULL
+  list(
+    host = host,
+    port = port,
+    startServer = function() {
+      id = httpuv::startServer(host, port, app)
+      server <<- id
+      print(paste0('server started on port ',port))
+      invisible(id)
+    },
+    stopServer = function() {
+      if (is.null(server)) stop('The server has not been started yet.')
+      try(httpuv::stopServer(server))
+    }
+  )
+}
 
 httd = function(...) {
   # httpuv uses Rook-style request handling:
@@ -88,37 +122,8 @@ httd = function(...) {
   invisible(server)
 }
 
-readFile = function(
-  fileName
-) {
-  invisible(readChar(fileName, file.info(fileName)$size))
-}
+try(if (!is.null(.GlobalEnv$runningServer)) {
+  .GlobalEnv$runningServer$stopServer()
+}, silent=TRUE)
 
-createServer = function(
-  host = '127.0.0.1',
-  port = 5001,
-  app
-) {
-  port = as.integer(port)
-
-  server = NULL
-  list(
-    host = host,
-    port = port,
-    startServer = function() {
-      id = httpuv::startServer(host, port, app)
-      server <<- id
-      print(paste0('server started on port ',port))
-      invisible(id)
-    },
-    stopServer = function() {
-      if (is.null(server)) stop('The server has not been started yet.')
-      try(httpuv::stopServer(server))
-    }
-  )
-}
-if (!is.null(.GlobalEnv$runningServer)) {
-  try(.GlobalEnv$runningServer$stopServer())
-}
-
-runningServer <- httd()
+.GlobalEnv$runningServer <- httd()
