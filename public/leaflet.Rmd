@@ -35,9 +35,10 @@ m <- leaflet(width = "100%", height=800) %>%
   # addMarkers(lng=29.9773, lat=31.1325, popup="The Pyramids")
   addMarkers(lng=174.768, lat=-36.852, popup="The birthplace of R")
 
+# https://github.com/leaflet-extras/leaflet-providers
 switch(params$tiles,
   normal = m,
-  monochrome = m %>% addProviderTiles(providers$Stamen.Toner)
+  monochrome = m %>% addProviderTiles("Stamen.Toner")
 )
 # m  # Print the map
 ```
